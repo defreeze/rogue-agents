@@ -1,0 +1,147 @@
+[
+  {
+    "id": "D01",
+    "title": "Gartner Says Nearly Half of CIOs Are Planning to Deploy Artificial Intelligence",
+    "outlet": "Gartner (press release)",
+    "date": "2018-02-13",
+    "url": "https://www.gartner.com/en/newsroom/press-releases/2018-02-13-gartner-says-nearly-half-of-cios-are-planning-to-deploy-artificial-intelligence",
+    "archive": "https://web.archive.org/web/2018/https://www.gartner.com/en/newsroom/press-releases/2018-02-13-gartner-says-nearly-half-of-cios-are-planning-to-deploy-artificial-intelligence",
+    "text": "Conversations with Gartner clients reveal that most organizations aren't well-prepared for implementing AI. Specifically, they lack internal skills in data science and plan to rely to a high degree on external providers to fill the gap. Fifty-three percent of organizations in the CIO survey rated their own ability to mine and exploit data as \"limited\" — the lowest level. Gartner predicts that through 2022, 85 percent of AI projects will deliver erroneous outcomes due to bias in data, algorithms or the teams responsible for managing them.",
+    "cites": [],
+    "role": "origin",
+    "note": "Origin of 85%: a forecast that 85% of AI projects 'will deliver erroneous outcomes' through 2022. Not a measured failure rate."
+  },
+  {
+    "id": "D02",
+    "title": "4 reasons why most data science projects fail",
+    "outlet": "CIO Dive (Opinion, guest article)",
+    "date": "2017-05-02",
+    "url": "http://www.ciodive.com/news/4-reasons-why-most-data-science-projects-fail/439637/",
+    "archive": "https://web.archive.org/web/2017/http://www.ciodive.com/news/4-reasons-why-most-data-science-projects-fail/439637/",
+    "text": "An article from Opinion 4 reasons why most data science projects fail Author By James Roberts Published May 2, 2017\n\n[...]\n\nThe following is a guest article from James Roberts, chief data scientist at Quisitive . Experts have called 2017 the year of data literacy and digital transformation. While data is a key component that drives true digital transformation, too often companies approach data and analytics projects the wrong way. In fact, a mere 13% of data and analytics projects reach completion, and of those that do, only 8% of company leadership report being completely satisfied with the outcome. Why are data science project results so dismal? Most failures can be traced back to four major pitfalls",
+    "cites": [],
+    "role": "origin",
+    "note": "Root of the 87% chain: unsourced '13% of data and analytics projects reach completion' in an opinion piece."
+  },
+  {
+    "id": "D03",
+    "title": "Why do 87% of data science projects never make it into production?",
+    "outlet": "VentureBeat (Sponsored, VB Staff)",
+    "date": "2019-07-19",
+    "url": "https://venturebeat.com/2019/07/19/why-do-87-of-data-science-projects-never-make-it-into-production/",
+    "archive": "https://web.archive.org/web/2019/https://venturebeat.com/2019/07/19/why-do-87-of-data-science-projects-never-make-it-into-production/",
+    "text": "Sponsored Why do 87% of data science projects never make it into production? VB Staff July 19, 2019 4:10 AM “If your competitors are applying AI, and they’re finding insight that allow them to accelerate, they’re going to peel away really, really quickly,” Deborah Leff, CTO for data science and AI at IBM, said on stage at Transform 2019 . On their panel, “What the heck does it even mean to ‘Do AI’? Leff and Chris Chapo, SVP of data and analytics at Gap, dug deep into the reason so many companies are still either kicking their heels or simply failing to get AI strategies off the ground, despite the fact that the inherent advantage large companies had over small companies is gone now, and the paradigm has changed completely. With AI, the fast companies are outperforming the slow companies, regardless of their size. And tiny, no-name companies are actually stealing market share from the giants. But if this is a universal understanding, that AI empirically provides a competitive edge, why do only 13% of data science projects, or just one out of every 10, actually make it into production?",
+    "cites": [],
+    "role": "relay",
+    "note": "Sponsored piece; states 13% inside a rhetorical question with no source. Built on a panel remark citing D02."
+  },
+  {
+    "id": "D04",
+    "title": "Want your company's A.I. project to succeed? Don't hand it to the data scientists, says this CEO",
+    "outlet": "Fortune",
+    "date": "2022-07-26",
+    "url": "https://fortune.com/2022/07/26/a-i-success-business-sense-aible-sengupta/",
+    "archive": "https://web.archive.org/web/2022/https://fortune.com/2022/07/26/a-i-success-business-sense-aible-sengupta/",
+    "text": "Arijit Sengupta once wrote an entire book titled Why A.I. is A Waste of Money . That’s a counterintuitive title for a guy who makes his money selling A.I. software to big companies. But Sengupta didn’t mean it ironically. He knows firsthand that for too many companies, A.I. doesn’t deliver the financial returns company officials expect. That’s borne out in a slew of recent surveys, where business leaders have put the failure rate of A.I. projects at between 83% and 92%. “As an industry, we’re worse than gambling in terms of producing financial returns,” Sengupta says.",
+    "cites": [],
+    "role": "origin",
+    "note": "'A slew of recent surveys ... between 83% and 92%': no surveys named or linked. Source RAND cites for 80%."
+  },
+  {
+    "id": "D05",
+    "title": "The Root Causes of Failure for Artificial Intelligence Projects and How They Can Succeed",
+    "outlet": "RAND Corporation (research report)",
+    "date": "2024-08-13",
+    "url": "https://www.rand.org/pubs/research_reports/RRA2680-1.html",
+    "archive": "https://web.archive.org/web/2024/https://www.rand.org/pubs/research_reports/RRA2680-1.html",
+    "text": "To investigate why artificial intelligence and machine learning (AI/ML) projects fail, the authors interviewed 65 data scientists and engineers with at least five years of experience in building AI/ML models in industry or academia. The authors identified five leading root causes for the failure of AI projects and synthesized the experts' experiences to develop recommendations to make AI projects more likely to succeed in industry settings and in academia. By some estimates, more than 80 percent of AI projects fail — twice the rate of failure for information technology projects that do not involve AI. Thus, understanding how to translate AI's enormous potential into concrete results remains an urgent challenge.\n\n[...]\n\n[Footnote 13 (attached to the 80 percent sentence in the PDF)] 13 Kahn, “Want Your Company’s AI Project to Succeed?”",
+    "cites": [
+      "D04"
+    ],
+    "role": "relay",
+    "note": "RAND's own finding is root causes from 65 interviews. The 80% is quoted 'by some estimates' from D04."
+  },
+  {
+    "id": "D06",
+    "title": "Failure rates for analytics, AI, and big data projects = 85% – yikes!",
+    "outlet": "Designing for Analytics (blog, Brian T. O'Neill)",
+    "date": "2019-07-23",
+    "url": "https://designingforanalytics.com/resources/failure-rates-for-analytics-bi-iot-and-big-data-projects-85-yikes/",
+    "archive": "https://web.archive.org/web/2019/https://designingforanalytics.com/resources/failure-rates-for-analytics-bi-iot-and-big-data-projects-85-yikes/",
+    "text": "It's disturbing just how bad the success rates are for AI, data science, analytics, IOT, big data, and BI projects. Worse, the numbers\n\n[...]\n\nJuly 2019: VentureBeat AI reports 87% of data science projects never make it into production Jan 2019: NewVantage survey reports 77% of businesses report that \"business adoption\" of big data and AI initiatives continues to represent a big challenge for business. That means 3/4 of the software being built is apparently collecting dust. Ouch. Jan 2019: Gartner says 80% of analytics insights will not deliver business outcomes through 2022 and 80% of AI projects will “remain alchemy, run by wizards” through 2020. Nov. 2017: Gartner says 60% of #bigdata projects fail to move past preliminary stages. Oops, they meant 85% actually.",
+    "cites": [
+      "D03"
+    ],
+    "role": "repeater",
+    "note": "Round-up that repeats 87% (VentureBeat) and Gartner figures."
+  },
+  {
+    "id": "D07",
+    "title": "Top 10 Reasons Why 87% of the Machine Learning Projects Fail?",
+    "outlet": "DEV Community (blog)",
+    "date": "2020-09-19",
+    "url": "https://dev.to/prajeen/top-10-reasons-why-87-of-the-machine-learning-projects-fail-5fd",
+    "archive": "https://web.archive.org/web/2020/https://dev.to/prajeen/top-10-reasons-why-87-of-the-machine-learning-projects-fail-5fd",
+    "text": "According to Gartner’s predictions , “ Through 2020, 80% of AI projects will remain alchemy, run by wizards whose talents will not scale in the organization” and Transform 2019 of VentureBeat predicted that 87% of AI projects will never make it into production .",
+    "cites": [
+      "D03"
+    ],
+    "role": "mutation",
+    "note": "Mutation: panel remark becomes 'VentureBeat predicted 87% of AI projects'."
+  },
+  {
+    "id": "D08",
+    "title": "Why 85% of AI Projects Are Expensive Failures",
+    "outlet": "Pavilion (newsletter editorial)",
+    "date": "2025-06-17",
+    "url": "https://www.joinpavilion.com/blog/why-85-of-ai-projects-are-expensive-failures",
+    "archive": "https://web.archive.org/web/2025/https://www.joinpavilion.com/blog/why-85-of-ai-projects-are-expensive-failures",
+    "text": "But there's another number we need to talk about. Gartner just revealed that 85% of AI initiatives fail to deliver their promised value. Nearly nine out of ten companies are striking out.",
+    "cites": [
+      "D01"
+    ],
+    "role": "mutation",
+    "note": "Mutation: 2018 forecast becomes 'Gartner just revealed 85% of AI initiatives fail to deliver their promised value'."
+  },
+  {
+    "id": "D09",
+    "title": "85% of AI Projects Fail. Don't Let Yours Be One of Them.",
+    "outlet": "AI Transformation Readiness (blog)",
+    "date": "2025-05-28",
+    "url": "https://www.aitransformationreadiness.org/post/why-ai-projects-fail",
+    "archive": "https://web.archive.org/web/2025/https://www.aitransformationreadiness.org/post/why-ai-projects-fail",
+    "text": "Yet, according to research from Gartner and leading global consulting firms, Up to 85% of AI projects fail —not because AI lacks potential, but because organizations are not fully prepared to implement it successfully.\n\n[...]\n\nList of References Gartner. (2019, January 21). Gartner says 85 percent of AI projects will deliver erroneous outcomes through 2022 .",
+    "cites": [
+      "D01"
+    ],
+    "role": "mutation",
+    "note": "Says '85% of AI projects fail' while its own reference is titled 'will deliver erroneous outcomes'."
+  },
+  {
+    "id": "D10",
+    "title": "Why do 87% of data science projects fail? And are we sure that it is true?",
+    "outlet": "Medium (blog)",
+    "date": "2021-07-09",
+    "url": "https://user5724987.medium.com/is-mlops-built-upon-a-lie-8282948b41ae",
+    "archive": "https://web.archive.org/web/2021/https://user5724987.medium.com/is-mlops-built-upon-a-lie-8282948b41ae",
+    "text": "In 2017, A Chief Data Scientist writes an “Opinion”-labeled guest article in CIO Dive Magazine where he states that “ a mere 13% of data and analytics projects reach completion ”. No source, no links leading to research papers, zero information about where does that magic number come from. Then, this article is brought up by a Global Leader and Industry CTO for Data Science and AI, IBM Deborah Leff during one of Transform 2019 panel where she says that: “I think CIO Dive Magazine says that only 13% of data science projects actually make it into production ”. This is then quoted by VentureBeat in their sponsored article which promoted Transform 2019 panel. The article doesn’t even provide a link to the video recording though. What happens next? A dozens or hundreds of ML and MLOps resources cite the same article, the same piece of information: 87% of data science projects never make it into production and use it as a background for selling their tools and products. I am genuinely disappointed that we spread such unconfirmed piece of information so easily , especially in community which is very close to R&D and academic environment — relying heavily on research. What does it mean for MLOps? Probably nothing, we still need it. It’s just shocking that we built this community, tools, startups on a phrase which is nothing but a magic number from a single, opinionated article .",
+    "cites": [
+      "D02",
+      "D03"
+    ],
+    "role": "critique",
+    "note": "Traces 87% back through VentureBeat and the panel to D02."
+  },
+  {
+    "id": "D11",
+    "title": "Myth Number 2: MIT Showed That 95% of AI Pilots Fail",
+    "outlet": "NewMR (blog, Ray Poynter)",
+    "date": "2026-05-31",
+    "url": "https://newmr.org/blog/myth-number-2-mit-showed-that-95-of-ai-pilots-fail/",
+    "archive": "https://web.archive.org/web/2026/https://newmr.org/blog/myth-number-2-mit-showed-that-95-of-ai-pilots-fail/",
+    "text": "Perhaps the most commonly quoted statistics about AI projects is that 95% of them fail, according to MIT. It has been quoted by Fortune, Forbes, Harvard Business Review, and a long tail of content that is still, in 2026, using “95% of AI pilots flop”\n\n[...]\n\nThey said the figures were “directionally accurate” and based on interviews rather than official company reporting. They warned that sample sizes varied by category, that success definitions differed across organisations, that selection bias was possible, that build-versus-buy percentages were interview-based rather than market-wide, and that a six-month window might understate success for slower enterprise rollouts.",
+    "cites": [],
+    "role": "critique",
+    "note": "About a different figure (95%, MIT NANDA 2025): context and a distractor."
+  }
+]
