@@ -3,6 +3,7 @@
     rogue run   [--mode swarm|single] [--dials calm|pressure] [--framing ...] [--safeguards none|all|a,b]
     rogue eval  [--configs ...] [-n 10]
     rogue replay TRACE.jsonl [--speed 2]
+    rogue demo  [--port 8765]
 """
 
 from __future__ import annotations
@@ -81,6 +82,10 @@ def main(argv: list[str] | None = None) -> int:
     from .evaluate import add_eval_parser
 
     add_eval_parser(sub)
+
+    from .demo import add_demo_parser
+
+    add_demo_parser(sub)
 
     args = parser.parse_args(argv)
     return args.fn(args)

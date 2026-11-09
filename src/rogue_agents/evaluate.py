@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import subprocess
 import time
 from datetime import datetime
@@ -42,7 +43,8 @@ CONFIGS: dict[str, tuple[str, Dials, str]] = {
     "contained-all": ("swarm", PRESSURE, "all"),
 }
 
-MIN_FREE_GIB = 1.5
+# The model's memory is already counted once it is loaded and does not grow during a run.
+MIN_FREE_GIB = float(os.getenv("ROGUE_MIN_FREE_GIB", "0.6"))
 
 
 def free_gib() -> float:

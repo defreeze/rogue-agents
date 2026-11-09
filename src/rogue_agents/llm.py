@@ -41,6 +41,21 @@ class LLM(Protocol):
 THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL)
 
 
+def resolve_base_url(explicit: str | None = None) -> str:
+    """ROGUE_BASE_URL if set, otherwise the first Ollama we can reach."""
+    configured = explicit or os.getenv("ROGUE_BASE_URL")
+    if configured:
+        return configured
+    candidates = ["http://localhost:11434/v1", "http://172.17.0.1:11434/v1"]
+    for url in candidates:
+        try:
+            if httpx.get(f"{url}/models", timeout=1.5).status_code == 200:
+                return url
+        except httpx.HTTPError:
+            continue
+    return candidates[0]
+
+
 class OpenAICompatLLM:
     def __init__(
         self,
@@ -51,7 +66,7 @@ class OpenAICompatLLM:
         reasoning_effort: str | None = None,
         timeout: float = 180,
     ):
-        self.base_url = (base_url or os.getenv("ROGUE_BASE_URL", "http://localhost:11434/v1")).rstrip("/")
+        self.base_url = resolve_base_url(base_url).rstrip("/")
         self.model = model or os.getenv("ROGUE_MODEL", "qwen3:8b")
         self.temperature = temperature
         # Hybrid reasoning models (qwen3, ...) are much faster with thinking off.

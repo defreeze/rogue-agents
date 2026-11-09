@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rogue Agents demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--bg:#0a0f1e;--panel:#121a30;--panel2:#1a2442;--edge:#2a3760;--text:#e8eef9;--muted:#8c9ab8;--cyan:#22d3ee;--purple:#a78bfa;--red:#f87171;--green:#34d399;--amber:#fbbf24}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:400 16px/1.3 Arial,Helvetica,sans-serif;overflow:hidden}
+#app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;gap:10px;padding:14px 18px}
+header{display:flex;align-items:center;gap:18px}
+#claim{font-size:clamp(20px,2.3vw,38px);font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#source{font-size:clamp(12px,1vw,17px);font-weight:700;padding:6px 14px;border-radius:999px;border:2px solid var(--muted);color:var(--muted);letter-spacing:.06em}
+#source.live{color:var(--green);border-color:var(--green)}
+#source.rec{color:var(--amber);border-color:var(--amber)}
+#main{display:grid;grid-template-columns:1fr minmax(260px,21vw);gap:12px;min-height:0}
+#stageWrap{position:relative;background:var(--panel);border-radius:14px;min-height:0;overflow:hidden}
+svg{width:100%;height:100%;display:block}
+.node{transition:transform .8s cubic-bezier(.3,1.2,.4,1)}
+.lbl{font-size:15px;font-weight:700;fill:var(--text);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.edge{fill:none;stroke:#4a5a8a;stroke-width:1.2;opacity:.55;transition:opacity .4s}
+.edge.ff{stroke:var(--amber);stroke-dasharray:4 4}
+.edge.hot{stroke:var(--cyan);stroke-width:3;opacity:1}
+.docText{font-size:14px;fill:var(--text);text-anchor:middle;font-weight:700}
+.docSub{font-size:11.5px;fill:var(--muted);text-anchor:middle}
+.doc{cursor:pointer}.f{cursor:pointer}
+#side{display:flex;flex-direction:column;gap:10px;min-height:0}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.m{background:var(--panel);border-radius:10px;padding:8px 12px}
+.m b{display:block;font-size:clamp(22px,2.5vw,42px);line-height:1.05}
+.m span{font-size:clamp(11px,.85vw,14px);color:var(--muted)}
+.m.bad b{color:var(--red)}.m.warn b{color:var(--amber)}.m.good b{color:var(--green)}
+#feed{flex:1;background:var(--panel);border-radius:10px;padding:10px 12px;overflow:hidden;font-size:clamp(12px,.95vw,16px);display:flex;flex-direction:column;justify-content:flex-end;min-height:0}
+#feed div{padding:2px 0;border-bottom:1px solid #1b2543}
+#feed .block{color:var(--red);font-weight:700}#feed .echo{color:var(--purple)}#feed .spawn{color:var(--amber)}#feed .find{color:var(--text)}#feed .dim{color:var(--muted)}
+footer{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit;background:var(--panel2);color:var(--text);border:1.5px solid var(--edge);border-radius:9px;padding:7px 13px;cursor:pointer;font-size:clamp(12px,1vw,16px)}
+button.on{border-color:var(--cyan);color:var(--cyan);font-weight:700}
+button.pressure.on{border-color:var(--red);color:var(--red)}
+button.guard.on{border-color:var(--green);color:var(--green)}
+button:disabled{opacity:.4;cursor:default}
+.sep{width:1px;height:26px;background:var(--edge);margin:0 4px}
+.tag{color:var(--muted);font-size:clamp(11px,.85vw,14px)}
+#stamp{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(10,15,30,.72);text-align:center;padding:30px}
+#stamp .v{font-size:clamp(50px,9vw,150px);font-weight:900;border:.08em solid currentColor;border-radius:.12em;padding:.02em .25em;transform:rotate(-6deg);animation:thump .35s cubic-bezier(.2,1.6,.4,1)}
+#stamp .c{font-size:clamp(16px,1.9vw,30px);margin-top:26px}
+#stamp .t{font-size:clamp(16px,1.7vw,27px);margin-top:14px;color:var(--text);max-width:80%}
+@keyframes thump{from{transform:rotate(-6deg) scale(2.2);opacity:0}}
+#drawer{position:absolute;right:0;top:0;bottom:0;width:min(520px,60%);background:#0d1428;border-left:2px solid var(--cyan);padding:18px 20px;overflow:auto;display:none;font-size:16px}
+#drawer h3{margin:0 0 8px;font-size:20px}#drawer .k{color:var(--muted);font-size:13px;margin-top:10px}#drawer blockquote{margin:6px 0;padding:8px 12px;background:var(--panel2);border-radius:8px;font-style:italic}
+#drawer mark{background:#14532d;color:#bbf7d0}
+#results{position:absolute;inset:0;background:var(--bg);display:none;padding:18px 22px;overflow:auto}
+#results h2{margin:0 0 4px;font-size:clamp(20px,2vw,32px)}
+table{border-collapse:collapse;width:100%;font-size:clamp(12px,1.05vw,18px);margin-top:12px}
+th{color:var(--muted);font-weight:700;text-align:right;padding:6px 10px;border-bottom:1.5px solid var(--edge)}th:first-child,td:first-child{text-align:left}
+td{padding:6px 10px;text-align:right;border-bottom:1px solid #1b2543}
+tr.group td{color:var(--cyan);font-weight:700;text-align:left;padding-top:12px;border:0}
+.bar{display:inline-block;height:.65em;background:var(--red);border-radius:2px;vertical-align:middle;margin-right:6px}
+#help{position:absolute;inset:8% 16%;background:#0d1428;border:2px solid var(--cyan);border-radius:14px;padding:24px 30px;display:none;font-size:clamp(14px,1.3vw,21px);z-index:9}
+#help kbd{background:var(--panel2);border:1px solid var(--edge);border-radius:5px;padding:1px 8px;font:inherit;font-weight:700;color:var(--cyan)}
+#help td{text-align:left;border:0;padding:4px 14px 4px 0}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div id="claim">Rogue Agents</div>
+    <div class="tag" id="config"></div>
+    <div id="source">READY</div>
+  </header>
+  <div id="main">
+    <div id="stageWrap">
+      <svg id="stage" viewBox="0 0 1200 650" preserveAspectRatio="xMidYMid meet"></svg>
+      <div id="stamp"></div>
+      <div id="drawer"></div>
+      <div id="results"></div>
+      <div id="help"></div>
+    </div>
+    <div id="side">
+      <div class="meters">
+        <div class="m"><b id="mRes">0</b><span>researchers</span></div>
+        <div class="m"><b id="mFind">0</b><span>findings</span></div>
+        <div class="m warn"><b id="mDist">0</b><span>distinct claims</span></div>
+        <div class="m"><b id="mRoots">0</b><span>documents opened</span></div>
+        <div class="m"><b id="mTok">0</b><span>tokens</span></div>
+        <div class="m bad"><b id="mOrig">no</b><span>original opened?</span></div>
+      </div>
+      <div class="m"><b id="mBlock" style="font-size:clamp(18px,1.8vw,30px)">0</b><span>actions blocked by controls</span></div>
+      <div id="feed"></div>
+    </div>
+  </div>
+  <footer id="controls"></footer>
+</div>
+<script>
+const $=id=>document.getElementById(id), NS="http://www.w3.org/2000/svg";
+const ROLE={origin:"#34d399",relay:"#22d3ee",repeater:"#fbbf24",mutation:"#fbbf24",critique:"#a78bfa"};
+const STANCE={statistic_true:"#34d399",statistic_false:"#f87171",unclear:"#64748b",supports_myth:"#34d399",refutes_myth:"#f87171"};
+const VERDICT={CONFIRMED:"#34d399",PLAUSIBLE:"#fbbf24",BUSTED:"#f87171"};
+const GUARDS=[["quote_check","quote check"],["provenance","provenance"],["origin_check","origin check"],["budgets","budgets"],["independence","independence"],["falsifier","falsifier"]];
+const PRESETS={
+  calm:{label:"1 Calm",framing:"neutral",board:"shared",read_budget:4,incentive:"accuracy",safeguards:[]},
+  pressure:{label:"2 Pressure",framing:"leading",board:"shared",read_budget:1,incentive:"volume",safeguards:[]},
+  contained:{label:"3 Contained",framing:"leading",board:"shared",read_budget:1,incentive:"volume",safeguards:GUARDS.map(g=>g[0])},
+};
+let status={recordings:[],live_ready:false,model:""}, corpus={docs:[],origin:"D01"}, spec={...PRESETS.calm,safeguards:[]}, preset="calm", live=false;
+let R, timer=null, es=null, paused=false, speed=+(new URLSearchParams(location.search).get("speed")||1.5);
+
+function fresh(){return {findings:[],claims:new Map(),reads:{},researchers:0,tokens:0,blocked:0,collapsed:false,end:null,verdict:null,playing:false}}
+const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---- stage ---- */
+let edgesG,nodesG,docsG,groupsG,docPos={};
+function shortName(d){const w=d.outlet.split(/[ (,]/);return (w[0].length<3?w.slice(0,2).join(" "):w[0])}
+function initStage(){
+  const s=$("stage");s.innerHTML="";
+  edgesG=el("g",{},s);groupsG=el("g",{},s);nodesG=el("g",{},s);docsG=el("g",{},s);
+  docPos={};const n=corpus.docs.length||1,step=1160/n,w=Math.min(step-10,100);
+  corpus.docs.forEach((d,i)=>{
+    const x=20+step*i+step/2;docPos[d.id]=x;
+    const g=el("g",{class:"doc",id:"doc-"+d.id},docsG);g.onclick=()=>showDoc(d.id);
+    const orig=d.id===corpus.origin;
+    el("rect",{x:x-w/2,y:556,width:w,height:84,rx:9,fill:"#0d1428",stroke:ROLE[d.role]||"#888","stroke-width":orig?3.5:1.6,id:"rect-"+d.id},g);
+    const t=el("text",{x,y:580,class:"docText"},g);t.textContent=d.id;
+    const a=el("text",{x,y:598,class:"docSub"},g);a.textContent=shortName(d)+" "+d.date.slice(0,4);
+    const b=el("text",{x,y:616,class:"docSub",id:"cnt-"+d.id},g);b.textContent=orig?"ORIGINAL":d.role;
+    if(orig)b.setAttribute("style","fill:#34d399;font-weight:700");
+    const c=el("text",{x,y:632,class:"docSub",id:"rd-"+d.id},g);c.textContent="unopened";
+  });
+}
+function gridPos(i,n){const cols=n>40?13:n>27?11:9,r=n>40?19:n>27?23:30,dx=1120/(cols-1),rows=Math.max(1,Math.ceil(n/cols)),dy=Math.min(96,450/rows);return {x:40+(i%cols)*dx,y:58+Math.floor(i/cols)*dy,r}}
+function place(f,x,y,r){f.x=x;f.y=y;f.g.style.transform=`translate(${x}px,${y}px)`;f.c.setAttribute("r",r);f.r=r}
+function layout(){if(R.collapsed)return collapse();const n=R.findings.length;R.findings.forEach((f,i)=>{const p=gridPos(i,n);place(f,p.x,p.y,p.r)});drawEdges()}
+function drawEdges(hot){
+  edgesG.innerHTML="";
+  if(R.collapsed)return;
+  R.findings.forEach(f=>{f.sources.forEach(s=>{
+    let d;
+    if(s[0]==="D"&&docPos[s]!==undefined){const x2=docPos[s];d=`M${f.x} ${f.y+f.r} C${f.x} ${(f.y+556)/2+40},${x2} ${(f.y+556)/2},${x2} 556`;el("path",{d,class:"edge"+(hot===f?" hot":"")},edgesG)}
+    else{const t=R.findings.find(o=>o.id===s);if(t)el("path",{d:`M${f.x} ${f.y} L${t.x} ${t.y}`,class:"edge ff"+(hot===f?" hot":"")},edgesG)}
+  })});
+}
+function addFinding(e){
+  const key=e.claim.trim().toLowerCase(),first=R.claims.get(key),echo=!!first;
+  const g=el("g",{class:"node f"},nodesG);
+  const fill=STANCE[e.stance]||"#64748b";
+  const c=el("circle",{r:4,fill:echo?"#1a2442":fill,stroke:echo?"#a78bfa":e.derived?"#fbbf24":"#fff","stroke-width":echo?3.5:e.verified?2:1.2,"stroke-dasharray":e.verified||e.derived?"":"5 4"},g);
+  const t=el("text",{class:"lbl"},g);t.textContent=e.id;if(echo)t.setAttribute("style","fill:#c4b5fd");
+  const f={...e,g,c,echo,key};
+  g.onclick=()=>showFinding(f);
+  R.findings.push(f);
+  if(echo)first.push(f);else R.claims.set(key,[f]);
+  layout();drawEdges(f);setTimeout(()=>{if(!R.collapsed)drawEdges()},1400);
+  feed(echo?`<b>${e.id}</b> ${esc(e.agent)} repeats ${first[0].id} word for word`:`<b>${e.id}</b> ${esc(e.agent)}: ${esc(e.claim.slice(0,90))}`,echo?"echo":"find");
+}
+function collapse(){
+  R.collapsed=true;edgesG.innerHTML="";groupsG.innerHTML="";closeDrawer();$("stamp").style.display="none";
+  const groups=[...R.claims.values()].sort((a,b)=>b.length-a.length),n=groups.length||1,step=Math.min(1120/n,230);
+  const left=600-step*(n-1)/2;
+  groups.forEach((g,i)=>{
+    const x=left+i*step;
+    g.forEach((f,k)=>place(f,x+(k-(g.length-1)/2)*Math.min(7,120/g.length),190,24));
+    const fo=el("foreignObject",{x:x-step/2+6,y:24,width:step-12,height:120},groupsG);
+    fo.innerHTML=`<div xmlns="http://www.w3.org/1999/xhtml" style="font:700 ${g.length>1?30:22}px Arial;color:${g.length>1?'#c4b5fd':'#8c9ab8'};text-align:center">${g.length}×</div><div xmlns="http://www.w3.org/1999/xhtml" style="font:12.5px/1.25 Arial;color:#e8eef9;text-align:center;overflow:hidden;max-height:84px">${esc(g[0].claim.slice(0,110))}</div>`;
+    const roots=new Set(g.flatMap(f=>f.roots||[]));
+    roots.forEach(r=>{if(docPos[r]!==undefined)el("path",{d:`M${x} 216 C${x} 380,${docPos[r]} 400,${docPos[r]} 556`,class:"edge",style:`opacity:.8;stroke-width:${Math.min(1+g.length,6)};stroke:${g.length>1?'#a78bfa':'#4a5a8a'}`},groupsG)});
+  });
+  const roots=new Set(R.findings.flatMap(f=>f.roots||[]));
+  const c=el("text",{x:600,y:330,"text-anchor":"middle",style:"font:700 34px Arial;fill:#e8eef9"},groupsG);
+  c.textContent=`${R.findings.length} findings → ${R.claims.size} claims → ${roots.size} documents`;
+  const o=corpus.origin,seen=(R.reads[o]||0)>0;
+  const d=el("text",{x:600,y:372,"text-anchor":"middle",style:`font:700 24px Arial;fill:${seen?'#34d399':'#f87171'}`},groupsG);
+  d.textContent=seen?`The original (${o}) was opened ${R.reads[o]}×`:`The original source (${o}) was never opened`;
+  if(!seen)$("rect-"+o)?.setAttribute("stroke","#f87171");
+}
+
+/* ---- events ---- */
+function feed(html,cls){const d=document.createElement("div");d.className=cls||"dim";d.innerHTML=html;const f=$("feed");f.appendChild(d);while(f.children.length>14)f.removeChild(f.firstChild)}
+function meters(){
+  $("mRes").textContent=R.researchers;$("mFind").textContent=R.findings.length;$("mDist").textContent=R.claims.size;
+  $("mRoots").textContent=Object.keys(R.reads).length;$("mTok").textContent=R.tokens>=1000?Math.round(R.tokens/1000)+"k":R.tokens;
+  const seen=(R.reads[corpus.origin]||0)>0,o=$("mOrig");o.textContent=seen?"yes":"no";o.parentElement.className="m "+(seen?"good":"bad");
+  $("mBlock").textContent=R.blocked;
+}
+function handle(e){
+  switch(e.type){
+    case "run_start":$("claim").textContent="“"+e.myth+"”";$("config").textContent=`${e.mode} · ${e.dials.framing} · ${e.dials.read_budget} doc(s) · ${e.dials.incentive} · ${e.safeguards.length?e.safeguards.length+" controls":"no controls"} · ${e.model}`;feed(esc(e.assignment),"find");break;
+    case "phase":feed("— "+esc(e.name)+" —");break;
+    case "spawn":R.researchers++;feed(`${esc(e.agent)} spawns <b>${esc(e.new_agent)}</b>`,"spawn");break;
+    case "llm_call":R.tokens=e.total_tokens;break;
+    case "tool_call":if(e.tool==="search_documents")feed(`${esc(e.agent)} searches “${esc(String(e.args.query||"").slice(0,50))}”`);break;
+    case "tool_result":if(e.tool==="read_document"){const m=/^(D\d\d) \|/.exec(e.result);if(m){R.reads[m[1]]=(R.reads[m[1]]||0)+1;const t=$("rd-"+m[1]);if(t){t.textContent="opened ×"+R.reads[m[1]];t.setAttribute("style","fill:#22d3ee;font-weight:700")}feed(`${esc(e.agent)} opens ${m[1]}`)}}break;
+    case "finding":addFinding(e);break;
+    case "blocked":R.blocked++;feed(`🛡 ${esc(e.reason)}`,"block");flash();break;
+    case "limit":feed("⏱ "+esc(e.reason));break;
+    case "halt":feed(`■ ${esc(e.reason)}`,"spawn");break;
+    case "vote":feed(`${esc(e.agent)} votes <b>${e.verdict}</b>`,"find");break;
+    case "verdict":R.verdict=e;break;
+    case "run_end":R.end=e;finish(e);break;
+  }
+  meters();
+}
+function flash(){const w=$("stageWrap");w.style.boxShadow="inset 0 0 0 4px #f87171";setTimeout(()=>w.style.boxShadow="",350)}
+function finish(e){
+  R.playing=false;renderControls();
+  const s=e.score,col=VERDICT[s.verdict]||"#8c9ab8",t=e.truth;
+  $("stamp").innerHTML=`<div class="v" style="color:${col}">${s.verdict||"NO VERDICT"}</div>
+   <div class="c">${s.verdict?s.confidence+"% confident · ":""}${e.researchers} researchers · ${e.tokens.toLocaleString()} tokens · ${Math.round(e.seconds)}s</div>
+   <div class="t"><b style="color:${VERDICT[t.verdict]}">Truth: ${t.verdict}</b> · ${esc(t.explanation)}</div>
+   <div class="c" style="color:#8c9ab8;font-size:15px">press C to see what the consensus rested on</div>`;
+  $("stamp").style.display="flex";
+  if(new URLSearchParams(location.search).get("collapse"))setTimeout(collapse,200);
+}
+
+/* ---- inspector for experts ---- */
+function closeDrawer(){$("drawer").style.display="none"}
+function showFinding(f){
+  const quote=esc(f.quote);
+  $("drawer").innerHTML=`<h3>${f.id} · ${esc(f.agent)}</h3><div>${esc(f.claim)}</div>
+   <div class="k">STANCE · CONFIDENCE</div>${esc(f.stance)} · ${f.confidence}
+   <div class="k">QUOTE ${f.verified?'<span style="color:#34d399">verified in cited document</span>':f.derived?'':'<span style="color:#f87171">NOT found in cited documents</span>'}</div><blockquote>${quote||"(none)"}</blockquote>
+   <div class="k">CITES</div>${f.sources.join(", ")||"nothing"}
+   <div class="k">RESTS ON (computed)</div>${(f.roots||[]).join(", ")||"nothing"}
+   ${f.echo?'<div class="k" style="color:#c4b5fd">ECHO: same sentence as an earlier finding</div>':""}
+   <p style="color:#8c9ab8;font-size:13px">click anywhere on the graph background to close</p>`;
+  $("drawer").style.display="block";
+}
+function showDoc(id){
+  const d=corpus.docs.find(x=>x.id===id);if(!d)return;
+  $("drawer").innerHTML=`<h3>${d.id} · ${esc(d.title)}</h3><div style="color:#8c9ab8">${esc(d.outlet)} · ${d.date}</div>
+   <div class="k">AUDIENCE-ONLY LABEL (agents never see this)</div>${esc(d.role)}
+   <div class="k">TEXT THE AGENTS CAN READ</div><blockquote style="white-space:pre-wrap">${esc(d.text)}</blockquote>
+   ${d.cites.length?`<div class="k">ATTRIBUTES ITS FIGURE TO</div>${d.cites.join(", ")}`:""}
+   <div class="k">SOURCE</div><span style="font-size:13px;word-break:break-all">${esc(d.url)}</span>`;
+  $("drawer").style.display="block";
+}
+$("stage").addEventListener("click",ev=>{if(ev.target.id==="stage")closeDrawer()});
+
+/* ---- results view ---- */
+const GROUPS=[["Does coordination matter?",["single-calm","parallel-calm","swarm-calm","single-pressure","parallel-pressure","swarm-pressure"]],["Which pressure?",["swarm-framing","swarm-read1","swarm-volume"]],["Remove the shared board",["swarm-blind"]],["What do controls buy?",["contained-falsifier","contained-code","contained-all"]]];
+async function toggleResults(){
+  const v=$("results");if(v.style.display==="block"){v.style.display="none";return}
+  const data=await (await fetch("/api/results")).json();
+  if(!data){v.innerHTML="<h2>No results yet</h2><p>Run rogue eval, then copy results.json into demo/.</p>";v.style.display="block";return}
+  let h=`<h2>“${esc(data.meta.claim)}” · counts out of N</h2><div class="tag">model ${esc(data.meta.model)} · commit ${esc(data.meta.commit)} · correct = BUSTED and true origin named</div><table><tr><th>configuration</th><th>N</th><th>correct</th><th>partly</th><th>wrong</th><th>false consensus</th><th>opened original</th><th>findings → claims</th><th>researchers</th><th>tokens</th></tr>`;
+  for(const [title,names] of GROUPS){h+=`<tr class="group"><td colspan="10">${title}</td></tr>`;for(const n of names){const a=data.configs[n];if(!a)continue;h+=`<tr><td>${n}</td><td>${a.n}</td><td>${a.correct}</td><td>${a.partial}</td><td>${a.wrong}</td><td><span class="bar" style="width:${a.false_consensus/a.n*70}px"></span>${a.false_consensus}</td><td>${a.opened_origin}</td><td>${a.findings.toFixed(1)} → ${a.distinct_claims.toFixed(1)}</td><td>${a.researchers.toFixed(1)}</td><td>${Math.round(a.tokens/1000)}k</td></tr>`}}
+  v.innerHTML=h+"</table>";v.style.display="block";
+}
+
+/* ---- playback ---- */
+function reset(){clearTimeout(timer);if(es){es.close();es=null}paused=false;R=fresh();initStage();$("feed").innerHTML="";$("stamp").style.display="none";closeDrawer();$("results").style.display="none";meters()}
+function recordingFor(name){return status.recordings.find(r=>r.preset===name)}
+async function start(name){
+  if(name){preset=name;spec={...PRESETS[name],safeguards:[...PRESETS[name].safeguards]}}
+  reset();R.playing=true;
+  const rec=preset&&recordingFor(preset);
+  if(live||!rec){return startLive()}
+  $("source").textContent="● RECORDED RUN";$("source").className="rec";renderControls();
+  const events=await (await fetch("/api/recording?name="+encodeURIComponent(rec.file))).json();
+  play(events,0);
+}
+function play(events,i){
+  if(i>=events.length)return;
+  if(paused){timer=setTimeout(()=>play(events,i),120);return}
+  handle(events[i]);
+  const gap=i+1<events.length?Math.min(events[i+1].t-events[i].t,1.4)/speed:0;
+  timer=setTimeout(()=>play(events,i+1),gap*1000);
+}
+async function startLive(){
+  $("source").textContent="● LIVE";$("source").className="live";renderControls();
+  const r=await fetch("/api/run",{method:"POST",body:JSON.stringify({...spec,mode:"swarm"})});
+  if(!r.ok){feed("A live run is already in progress.","block");R.playing=false;renderControls();return}
+  es=new EventSource("/api/stream");
+  es.onmessage=m=>{const e=JSON.parse(m.data);handle(e);if(e.type==="run_end"){es.close();es=null}};
+  es.onerror=()=>{if(es){es.close();es=null}};
+}
+
+/* ---- controls ---- */
+function chip(label,on,fn,cls){const b=document.createElement("button");b.textContent=label;if(on)b.classList.add("on");if(cls)b.classList.add(cls);b.onclick=fn;$("controls").appendChild(b);return b}
+function sep(){const s=document.createElement("div");s.className="sep";$("controls").appendChild(s)}
+function tweak(fn){fn();preset=null;renderControls()}
+function renderControls(){
+  $("controls").innerHTML="";
+  for(const k in PRESETS)chip(PRESETS[k].label,preset===k,()=>start(k),k==="pressure"?"pressure":"");
+  sep();
+  chip(spec.framing==="leading"?"“Confirm it”":"“Is it true?”",spec.framing==="leading",()=>tweak(()=>spec.framing=spec.framing==="leading"?"neutral":"leading"),"pressure");
+  chip(spec.read_budget+" doc"+(spec.read_budget>1?"s":"")+" each",spec.read_budget===1,()=>tweak(()=>spec.read_budget=spec.read_budget===1?4:1),"pressure");
+  chip(spec.incentive==="volume"?"rewarded: volume":"rewarded: accuracy",spec.incentive==="volume",()=>tweak(()=>spec.incentive=spec.incentive==="volume"?"accuracy":"volume"),"pressure");
+  chip(spec.board==="blind"?"board: blind":"board: shared",spec.board==="shared",()=>tweak(()=>spec.board=spec.board==="blind"?"shared":"blind"),"pressure");
+  sep();
+  for(const [k,l] of GUARDS)chip(l,spec.safeguards.includes(k),()=>tweak(()=>{const i=spec.safeguards.indexOf(k);i<0?spec.safeguards.push(k):spec.safeguards.splice(i,1)}),"guard");
+  sep();
+  const lv=chip(live?"source: live":"source: recorded",live,()=>{live=!live;renderControls()});lv.disabled=!status.live_ready;lv.title=status.live_ready?"":"model not reachable: recorded runs only";
+  chip("▶ Run",false,()=>start(preset));
+}
+const HELP=`<h2 style="margin-top:0">Keys</h2><table><tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td>play calm / pressure / contained</td></tr><tr><td><kbd>C</kbd></td><td>collapse the board to what it rests on</td></tr><tr><td><kbd>Space</kbd></td><td>pause or resume a recording</td></tr><tr><td><kbd>L</kbd></td><td>switch recorded / live</td></tr><tr><td><kbd>E</kbd></td><td>evaluation results</td></tr><tr><td><kbd>+</kbd> <kbd>-</kbd></td><td>faster / slower</td></tr><tr><td><kbd>R</kbd></td><td>reset</td></tr><tr><td><kbd>F</kbd></td><td>full screen</td></tr><tr><td><kbd>?</kbd></td><td>this help</td></tr></table><p>Click any finding or document to inspect it.</p>`;
+addEventListener("keydown",e=>{
+  if(e.target.tagName==="BUTTON")e.target.blur();
+  const k=e.key.toLowerCase();
+  if(k==="1")start("calm");else if(k==="2")start("pressure");else if(k==="3")start("contained");
+  else if(k==="c"&&R.findings.length)collapse();
+  else if(k===" "){e.preventDefault();paused=!paused;feed(paused?"paused":"resumed")}
+  else if(k==="r"){reset();$("source").textContent="READY";$("source").className=""}
+  else if(k==="l"&&status.live_ready){live=!live;renderControls()}
+  else if(k==="e")toggleResults();
+  else if(k==="f"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  else if(k==="+"||k==="="){speed=Math.min(speed*1.5,40);feed("speed ×"+speed.toFixed(1))}
+  else if(k==="-"){speed=Math.max(speed/1.5,.4);feed("speed ×"+speed.toFixed(1))}
+  else if(k==="?"){const h=$("help");h.innerHTML=HELP;h.style.display=h.style.display==="block"?"none":"block"}
+  else if(k==="escape"){closeDrawer();$("help").style.display="none";$("results").style.display="none"}
+});
+(async()=>{
+  status=await (await fetch("/api/status")).json();
+  corpus=await (await fetch("/api/corpus")).json();
+  $("claim").textContent="“"+status.cases["85"]+"”";
+  reset();renderControls();
+  const q=new URLSearchParams(location.search);
+  if(q.get("play"))start(q.get("play"));
+  if(q.get("results"))toggleResults();
+})();
+</script>
+</body>
+</html>
