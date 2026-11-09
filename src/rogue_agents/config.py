@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, fields, replace
 
-MYTH = "85% of AI projects fail."
-
 
 @dataclass(frozen=True)
 class Dials:

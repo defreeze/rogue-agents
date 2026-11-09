@@ -57,6 +57,7 @@ class OpenAICompatLLM:
         # Hybrid reasoning models (qwen3, ...) are much faster with thinking off.
         # Set ROGUE_REASONING_EFFORT="" for providers that reject the field.
         self.reasoning_effort = reasoning_effort if reasoning_effort is not None else os.getenv("ROGUE_REASONING_EFFORT", "none")
+        self.seed: int | None = None  # set per run; each call gets the next value
         key = api_key or os.getenv("ROGUE_API_KEY", "")
         headers = {"Authorization": f"Bearer {key}"} if key else {}
         self.http = httpx.Client(timeout=timeout, headers=headers)
@@ -80,6 +81,9 @@ class OpenAICompatLLM:
             body["tools"] = tools
         if self.reasoning_effort:
             body["reasoning_effort"] = self.reasoning_effort
+        if self.seed is not None:
+            body["seed"] = self.seed
+            self.seed += 1
         data = self._post(body)
         message = data["choices"][0]["message"]
         calls = []

@@ -32,7 +32,7 @@ def color(agent: str) -> str:
         return "cyan"
     if agent == "falsifier":
         return "red"
-    if agent == "solo":
+    if agent in ("solo", "vote"):
         return "magenta"
     return ["yellow", "magenta", "blue", "green", "bright_cyan", "bright_magenta"][int(agent.rsplit("-", 1)[-1]) % 6] if "-" in agent else "white"
 
@@ -127,6 +127,9 @@ class Renderer:
             f"⚖  [{style}]{e['verdict']}[/] (confidence {e['confidence']})  origin: {escape(str(e['origin_doc']))} ({e['origin_type']})\n"
             f"[italic]{escape(e['summary'][:400])}[/]",
         )
+
+    def on_vote(self, e: dict) -> None:
+        self.line(e["agent"], f"🗳  votes [{VERDICT_STYLE.get(e['verdict'], 'bold')}]{e['verdict']}[/] ({e['confidence']})")
 
     def on_agent_end(self, e: dict) -> None:
         if self.verbose and e["answer"]:

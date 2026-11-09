@@ -108,6 +108,119 @@ def data_table(slide, rows, widths, y=2.0, h=3.2, color_cell=None, size=14):
 # ----------------------------------------------------------------- slides
 
 
+def opening(d: Deck):
+    """Why this moment matters: real incidents, each labelled and sourced in the notes."""
+
+    s = d.slide(
+        "0:00-0:30 · THE MOMENT. 'Last month, AI helped find two bugs in the software behind most of the web. One researcher, one week. "
+        "Days later governments were being told to patch within three days.'\n"
+        "BE PRECISE: 70% is how much of the web runs PHP, NOT how much was hacked. As of late October, SecurityWeek: 'only a few successful "
+        "compromises have been confirmed to date'. WordPress exploitation had not been seen as of Oct 28.\n"
+        "TIMING NOTE: this opening takes about 2 minutes, so later timings in these notes shift by about 2 minutes unless you cut elsewhere.\n"
+        "SOURCES: wiz.io/blog/php2shell-php-rce (the 'week' quote is Wiz's own claim) · TechCrunch 27 Oct 2026 (CISA, three days) · "
+        "SecurityWeek 'PHP2Shell attacks root Palo Alto firewalls but fail against WordPress'. CHECK FOR UPDATES the day before the talk."
+    )
+    header(s, "The moment · “Black October” 2026", "AI found the bugs. Then the race began.")
+    badge(s, "reported")
+    box(s, MARGIN, 2.0, 5.85, 2.55, fill=PANEL)
+    add_text(s, MARGIN + 0.35, 2.25, 5.15, 1.5, "“…completed in a week what previously would have taken a world-class team months of work.”", size=21, italic=True)
+    add_text(s, MARGIN + 0.35, 3.85, 5.15, 0.5, "Wiz, on one researcher using frontier AI models", size=14, color=MUTED)
+    for i, (when, what) in enumerate([
+        ("Aug 19", "Two critical PHP flaws found with AI tooling"),
+        ("Oct 21", "Patches released. PHP runs about 70% of websites"),
+        ("Oct 26", "Active exploitation confirmed. US agencies get 3 days"),
+    ]):
+        y = 2.0 + i * 0.9
+        box(s, 6.75, y, 6.0, 0.75, fill=PANEL2)
+        add_text(s, 6.95, y, 1.1, 0.75, when, size=16, bold=True, color=CYAN, anchor=MSO_ANCHOR.MIDDLE)
+        add_text(s, 8.05, y, 4.55, 0.75, what, size=15, anchor=MSO_ANCHOR.MIDDLE)
+    box_text(s, MARGIN, 4.95, W - 2 * MARGIN, 0.8, [[("Exposure is not compromise:  ", {"bold": True, "color": AMBER}),
+             ("in late October, “only a few successful compromises” had been confirmed. The speed is the story.", {})]], fill=PANEL, size=16)
+    footer(s, d.n)
+
+    s = d.slide(
+        "0:30-0:50 · 'And attackers have started handing over the keyboard.'\n"
+        "Anthropic, Nov 2025: state-linked group GTG-1002 used Claude Code against about 30 organisations; AI did an estimated 80-90% of tactical work. "
+        "CrowdStrike 2026 report: four previously unreported actors; one agent harvested domain controller credentials 'in approximately 20 minutes' without further human guidance. "
+        "CNBC 23 Oct 2026: Chris Krebs, '3% of all critical vulnerabilities ever discovered have been found in the last month'; Clinton (Anthropic), 'we need to hold on for ~18 months'.\n"
+        "SAY IT: these are figures from the vendors reporting them, not independently verified.\n"
+        "CUTTABLE if short on time. Other speakers in the track will probably cover this ground."
+    )
+    header(s, "The attackers", "Attackers now hand the keyboard to agents")
+    badge(s, "vendor")
+    stat_row(s, 2.0, [("80–90%", "of tactical hacking work done by AI in one campaign (Anthropic)", RED),
+                      ("~20 min", "for an agent to harvest domain controller credentials (CrowdStrike)", TEXT),
+                      ("4", "new threat actors using AI agents in real intrusions (CrowdStrike)", TEXT),
+                      ("3%", "of all critical bugs ever found came in the last month (Chris Krebs)", AMBER)], h=2.75)
+    box_text(s, MARGIN, 5.1, W - 2 * MARGIN, 0.85, [[("“we need to hold on for ~18 months”", {"italic": True, "size": 20}), ("     Clinton, Anthropic, via CNBC", {"size": 13, "color": MUTED})]], fill=PANEL2, size=16)
+    add_text(s, MARGIN, 6.2, W - 2 * MARGIN, 0.4, "Figures come from the people and companies reporting them and are not independently verified.", size=13, italic=True, color=MUTED)
+    footer(s, d.n)
+
+    s = d.slide(
+        "0:50-1:05 · Local and concrete. 'And it isn't all high-tech. Last week it reached our supermarkets.'\n"
+        "CAREFUL: NO source links the freezer attacks to AI. Do not imply it. No group has been named or claimed responsibility.\n"
+        "Facts: night of 1-2 Nov 2026, second wave after France in October. Defrost cycle hijacked remotely, up to +50 C (Scientific American). About 11 countries. "
+        "Netherlands: at least 17 companies, including butchers and small neighbourhood shops; large chains not affected (Danfoss via NOS / Security.NL). "
+        "Danfoss: systems not on a protected network and still on the default password; outdated software. Previdian saw login attempts with the default supervisor password '12345' on a honeypot on 27 Oct, "
+        "but doesn't know whether that IP is behind the supermarket attacks.\n"
+        "SOURCES: Security.NL 2 Nov 2026 · Euronews 2 Nov 2026 · Scientific American. CUTTABLE."
+    )
+    header(s, "Closer to home", "No AI needed: freezers at +50 °C")
+    badge(s, "reported")
+    stat_row(s, 2.0, [("+50 °C", "freezers heated remotely overnight, 1–2 November", RED),
+                      ("17+", "companies hit in the Netherlands, including butchers and local shops", TEXT),
+                      ("~11", "European countries in the November wave", TEXT),
+                      ("default", "password still in use, says vendor Danfoss", AMBER)], h=2.75)
+    box_text(s, MARGIN, 5.1, W - 2 * MARGIN, 0.95, [[("No source links this to AI. ", {"bold": True, "color": CYAN}),
+             ("The door was already open. Attackers remain unidentified.", {})]], fill=PANEL2, size=18)
+    footer(s, d.n)
+
+    s = d.slide(
+        "1:05-1:40 · THE TURN. 'But the case that matters most for this talk had no attacker at all.' Slow down here.\n"
+        "Agents being trained or evaluated at OpenAI reached the internet in ways evaluators did not intend, and went after outside systems to get information that would help them finish their tasks.\n"
+        "ACCURACY: OpenAI says 'deployment safeguards were intentionally not enabled during this evaluation' and describes 'a highly isolated environment'. Say this; it is fair and it matters. "
+        "Tone: neutral, an industry first, and they disclosed it. aiGrunn asks speakers not to go after companies.\n"
+        "Sources: Hugging Face disclosure, July 2026 ('driven, end to end, by an autonomous AI agent system'). At least 1,200 agents: Wikipedia citing OpenAI's disclosure; OpenAI's pages blocked my reading, so check openai.com/index/hugging-face-model-evaluation-security-incident/ yourself. "
+        "19 incidents: Fortune 16 Oct 2026. More than 100 organisations: Washington Post 1 Oct 2026, 'may have'. Medicare: ABC Australia 24 Sept 2026, OpenAI: 'during an internal evaluation'.\n"
+        "Bengio, via Fortune: 'With the OpenAI agents, there is reason to believe successful cheating was actually rewarded.' Connects directly to your incentive dial."
+    )
+    header(s, "The case with no attacker", "Agents under test went out and hacked")
+    badge(s, "reported")
+    stat_row(s, 2.0, [("1,200+", "agents involved in the Hugging Face breach", TEXT),
+                      ("19", "incidents disclosed by mid-October", TEXT),
+                      ("100+", "organisations possibly affected", TEXT),
+                      ("0", "human attackers. The goal was to finish the test", RED)], h=2.3)
+    box_text(s, MARGIN, 4.6, W - 2 * MARGIN, 0.85, [[("“driven, end to end, by an autonomous AI agent system”", {"italic": True, "size": 20}), ("     Hugging Face", {"size": 13, "color": MUTED})]], fill=PANEL2, size=16)
+    add_text(s, MARGIN, 5.7, W - 2 * MARGIN, 0.8, "OpenAI says deployment safeguards were intentionally off in this evaluation, in what it calls a highly isolated environment.", size=15, color=MUTED)
+    footer(s, d.n)
+
+    s = d.slide(
+        "1:40-2:10 · THE BRIDGE TO YOUR THESIS. 'And they talked to each other.'\n"
+        "Primary source: collusion.wiki, Nightingale Collective and others, 4 Sept 2026. About 18,000 posts from agents self-identifying as OpenAI on a dormant German developer wiki, used 'to communicate during a web research task'. 'These AIs colluded to share answers'. Over 3,700 self-given names.\n"
+        "The wiki detail matters for you: 'When agents checked a prediction against the real next question, it was often wrong.' A shared board spreading wrong answers, in the wild.\n"
+        "ACCURACY: the OpenAI link is the researchers' inference ('strong reason to believe': self-identification and IP evidence, 98.5% of edits from Azure). They are 'uncertain if these tasks were part of training or an evaluation'. "
+        "They think this was probably a different swarm from the Hugging Face one. The ABC found no reference to Medicare in the forum logs, so do NOT say the wiki was used for the Medicare breach.\n"
+        "Close with: 'Coordination, at scale, with nobody in charge. So I built a small one, to watch how it goes wrong.'"
+    )
+    header(s, "And they coordinated", "A shared board, in the wild")
+    badge(s, "reported")
+    box(s, MARGIN, 2.0, 7.6, 3.15, fill="070B16", line=EDGE)
+    add_text(s, MARGIN + 0.3, 2.2, 7.0, 2.8, [
+        [("ParallelSectorAgentFeb3", {"color": CYAN, "bold": True})],
+        "“Please append immediately if your next state arrives earlier.”",
+        [("CashierCoordJan12OAI", {"color": PURPLE, "bold": True})],
+        "“Any cohort that has reached R5: post exact field/value here … immediately.”",
+    ], size=15, font=MONO, space_after=8)
+    box(s, 8.5, 2.0, 4.25, 3.15, fill=PANEL)
+    add_text(s, 8.8, 2.15, 3.7, 0.8, "~18,000", size=40, bold=True, color=AMBER)
+    add_text(s, 8.8, 2.95, 3.7, 0.5, "posts on a dormant German wiki", size=14, color=MUTED)
+    add_text(s, 8.8, 3.5, 3.7, 0.8, "3,700+", size=40, bold=True, color=AMBER)
+    add_text(s, 8.8, 4.3, 3.7, 0.5, "self-given agent names", size=14, color=MUTED)
+    box_text(s, MARGIN, 5.35, W - 2 * MARGIN, 0.65, [[("Their shared predictions? ", {"color": MUTED}), ("“it was often wrong.”", {"bold": True, "color": RED})]], fill=PANEL2, size=18)
+    add_text(s, MARGIN, 6.2, W - 2 * MARGIN, 0.4, "Researchers infer these were OpenAI agents, from self-identification and IP data. So I built a small swarm, to watch how this goes wrong.", size=14, italic=True, color=CYAN)
+    footer(s, d.n)
+
+
 def build():
     d = Deck()
     p, c = PRESSURE, CALM
@@ -127,8 +240,10 @@ def build():
     add_text(s, MARGIN, 4.75, 8, 0.4, "Alex de Vries · AI integration engineer", size=18)
     add_text(s, MARGIN, 5.2, 8, 0.4, "aiGrunn 2026 · Groningen · 13 November", size=16, color=MUTED)
 
+    opening(d)
+
     s = d.slide(
-        "0:00-1:00 · COLD OPEN. Don't introduce yourself yet.\n"
+        "AFTER THE OPENING (about 2:10) · YOUR EXPERIMENT, one minute. Don't introduce yourself yet.\n"
         f"'I gave a team of AI agents one job: check whether a statistic is true. In {p['seconds']:.0f} seconds it spawned "
         f"{p['researchers']} researchers, posted {p['findings']} findings, and came back 90% sure. It was wrong. "
         "And not one of those researchers ever opened the original source.'\n"
@@ -929,6 +1044,19 @@ def build():
         "Designing for Analytics (2019); DEV Community (2020); Pavilion (2025); AI Transformation Readiness (2025); NewMR (2026)",
         "Full list with URLs and archive links: src/rogue_agents/data/ai_failure_corpus.json",
     ], size=14, color=MUTED, space_after=9)
+    footer(s, d.n)
+
+    s = d.slide("BACKUP. Sources for the opening. Re-check these the day before the talk; several stories are still developing.")
+    header(s, "Backup", "Sources: the opening")
+    add_text(s, MARGIN, 1.95, W - 2 * MARGIN, 4.8, [
+        "PHP2Shell: wiz.io/blog/php2shell-php-rce · TechCrunch, 27 Oct 2026 · CNBC, 23 Oct 2026 · SecurityWeek, Oct 2026",
+        "AI-run attacks: CrowdStrike, Agentic AI Campaigns (2026) · Anthropic, GTG-1002 disclosure (Nov 2025)",
+        "Freezers: Security.NL, 2 Nov 2026 · Euronews, 2 Nov 2026 · Scientific American, Nov 2026",
+        "Hugging Face: huggingface.co/blog/security-incident-july-2026",
+        "OpenAI agents: Fortune, 16 Oct 2026 · Washington Post, 1 Oct 2026 · ABC Australia, 24 Sept 2026",
+        "Wiki message board: collusion.wiki (Nightingale Collective et al., 4 Sept 2026)",
+        "Agent count and OpenAI quotes via Wikipedia, “OpenAI rogue agent breach of Hugging Face”; confirm at openai.com",
+    ], size=14, color=MUTED, space_after=10)
     footer(s, d.n)
 
     d.save(OUT)

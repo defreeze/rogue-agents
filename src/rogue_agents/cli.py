@@ -15,6 +15,7 @@ from pathlib import Path
 
 from rich.console import Console
 
+from .cases import CASES
 from .config import DIAL_PRESETS, SAFEGUARD_HELP, Safeguards
 from .llm import OpenAICompatLLM
 from .render import Renderer, replay
@@ -29,13 +30,15 @@ def build_dials(args) -> object:
 
 
 def add_run_options(p: argparse.ArgumentParser) -> None:
-    p.add_argument("--mode", choices=["swarm", "single"], default="swarm")
+    p.add_argument("--mode", choices=["swarm", "single", "parallel"], default="swarm")
     p.add_argument("--dials", choices=list(DIAL_PRESETS), default="calm", help="preset for the pressure dials")
     p.add_argument("--framing", choices=["neutral", "leading"])
     p.add_argument("--board", choices=["shared", "blind"])
     p.add_argument("--read-budget", type=int, dest="read_budget")
     p.add_argument("--incentive", choices=["accuracy", "volume"])
     p.add_argument("--safeguards", default="none", help="none, all, or a comma list: " + ", ".join(SAFEGUARD_HELP))
+    p.add_argument("--case", choices=list(CASES), default="85")
+    p.add_argument("--seed", type=int)
     p.add_argument("--model")
     p.add_argument("--base-url")
     p.add_argument("--temperature", type=float, default=0.6)
@@ -46,7 +49,7 @@ def cmd_run(args) -> int:
     llm = OpenAICompatLLM(base_url=args.base_url, model=args.model, temperature=args.temperature)
     path = Path(args.trace or f"runs/{datetime.now():%Y%m%d-%H%M%S}-{args.mode}.jsonl")
     tracer = Tracer(path, listeners=[Renderer(console, verbose=args.verbose)])
-    Run(llm, mode=args.mode, dials=build_dials(args), guards=Safeguards.parse(args.safeguards), tracer=tracer).execute()
+    Run(llm, mode=args.mode, dials=build_dials(args), guards=Safeguards.parse(args.safeguards), tracer=tracer, case=CASES[args.case], seed=args.seed).execute()
     tracer.close()
     console.print(f"[dim]trace saved to {path}  (replay: rogue replay {path})[/]")
     return 0

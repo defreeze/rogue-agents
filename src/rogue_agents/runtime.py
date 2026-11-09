@@ -8,23 +8,26 @@ other way.
 from __future__ import annotations
 
 import json
+import re
 import time
-from collections import deque
+from collections import Counter, deque
 from dataclasses import asdict, dataclass, field
 from typing import Callable
 
 from . import agents
 from .board import STANCES, Board
-from .config import BUDGET, LAB_LIMITS, MYTH, Dials, Safeguards
+from .cases import CASES, Case
+from .config import BUDGET, LAB_LIMITS, Dials, Safeguards
 from .corpus import Corpus
 from .llm import LLM, LLMResponse, ToolCall
-from .scoring import TRUTH, score
+from .scoring import score
 from .trace import Tracer
 
 # Model calls held back so the lead can still conclude when the research budget runs out.
 CONCLUDE_RESERVE = 4
 # Verification time is protected: researchers cannot spend the falsifier's share.
 FALSIFIER_RESERVE = 12
+PARALLEL_AGENTS = 3
 FALSIFIER_READS = 4
 LEAD_READS = 4
 
@@ -128,20 +131,26 @@ class Run:
         guards: Safeguards = Safeguards(),
         tracer: Tracer | None = None,
         corpus: Corpus | None = None,
+        case: Case | None = None,
+        seed: int | None = None,
     ):
-        if mode not in ("swarm", "single"):
-            raise ValueError("mode must be 'swarm' or 'single'")
+        if mode not in ("swarm", "single", "parallel"):
+            raise ValueError("mode must be 'swarm', 'single' or 'parallel'")
         self.llm = llm
         self.mode = mode
         self.dials = dials
         self.guards = guards
         self.tracer = tracer or Tracer()
-        self.corpus = corpus or Corpus.load()
+        self.case = case or CASES["85"]
+        self.corpus = corpus or Corpus.load(self.case.corpus)
+        if seed is not None and hasattr(llm, "seed"):
+            llm.seed = seed
         self.limits = BUDGET if guards.budgets else LAB_LIMITS
         self.board = Board()
         self.queue: deque[tuple[str, str]] = deque()
         self.researchers = 0
         self.verdict: dict | None = None
+        self.votes: list[dict] = []
         self.read_docs: set[str] = set()
         self.phase = "research"  # research | falsify | conclude
         self.llm_calls = self.tokens = self.tool_calls = self.blocked = 0
@@ -162,11 +171,11 @@ class Run:
 
     def execute(self) -> RunResult:
         start = time.monotonic()
-        task = agents.assignment(self.dials)
+        task = agents.assignment(self.dials, self.case.claim)
         self.emit(
             "run_start",
             mode=self.mode,
-            myth=MYTH,
+            myth=self.case.claim,
             assignment=task,
             dials=asdict(self.dials),
             safeguards=self.guards.enabled,
@@ -174,9 +183,13 @@ class Run:
         )
         status, reason = "completed", ""
         try:
-            if self.mode == "single":
+            if self.mode in ("single", "parallel"):
                 prompt = f"{agents.SINGLE}\n\n{agents.INCENTIVE[self.dials.incentive]}"
-                self.run_agent(AgentState("solo", read_budget=self.dials.read_budget), prompt, task, SINGLE_TOOLS, required="submit_verdict")
+                names = ["solo"] if self.mode == "single" else [f"agent-{i + 1}" for i in range(PARALLEL_AGENTS)]
+                for name in names:
+                    self.run_agent(AgentState(name, read_budget=self.dials.read_budget), prompt, task, SINGLE_TOOLS, required="submit_verdict")
+                if self.mode == "parallel":
+                    self.tally_votes()
             else:
                 self.research_phase(task)
                 self.phase = "conclude"
@@ -187,7 +200,7 @@ class Run:
             status, reason = h.status, h.reason
             self.emit("halt", status=status, reason=reason)
 
-        s = score(self.verdict, self.board)
+        s = score(self.verdict, self.board, self.case, self.read_docs)
         result = RunResult(
             mode=self.mode,
             dials=self.dials.describe(),
@@ -206,7 +219,7 @@ class Run:
             reason=reason,
             board=[f.to_dict() for f in self.board.findings.values()],
         )
-        self.emit("run_end", truth=TRUTH, **{k: v for k, v in result.to_dict().items() if k not in ("model", "board")})
+        self.emit("run_end", truth=self.case.truth, **{k: v for k, v in result.to_dict().items() if k not in ("model", "board")})
         return result
 
     def research_phase(self, task: str) -> None:
@@ -236,7 +249,7 @@ class Run:
                     AgentState("falsifier", read_budget=FALSIFIER_READS),
                     agents.FALSIFIER,
                     # An independent reviewer sees the claim, not the stakeholder's framing of it.
-                    f'Claim under review: "{MYTH}"\nCheck the consensus on the board against the original documents.',
+                    f'Claim under review: "{self.case.claim}"\nCheck the consensus on the board against the original documents.',
                     FALSIFIER_TOOLS,
                 )
             except Halt as h:
@@ -318,10 +331,11 @@ class Run:
         return result
 
     def search_documents(self, state: AgentState, args: dict) -> str:
-        hits = self.corpus.search(str(args.get("query", "")))
+        query = str(args.get("query", ""))
+        hits = self.corpus.search(query)
         if not hits:
             return "No documents match."
-        return "\n".join(f"{d.header()}\n   {d.text[:160]}..." for d in hits)
+        return "\n".join(f"{d.header()}\n   {self.corpus.snippet(d, query)}" for d in hits)
 
     def read_document(self, state: AgentState, args: dict) -> str:
         doc = self.corpus.get(str(args.get("doc_id", "")))
@@ -399,6 +413,8 @@ class Run:
                 return self.block(state.name, "origin_check", "submit_verdict", f"{doc.id} attributes this figure to {', '.join(doc.cites)}, so it cannot be the origin; read the original")
             if doc.id not in self.read_docs:
                 return self.block(state.name, "origin_check", "submit_verdict", f"nobody on the team has read {doc.id}; read it before naming it as the origin")
+            if not any(re.search(rf"\b{f}\s*(%|percent)", doc.text, re.I) for f in self.case.figures):
+                return self.block(state.name, "origin_check", "submit_verdict", f"{doc.id} never states this figure, so it cannot be its origin")
         origin_type = str(args.get("origin_type", "unknown")).lower()
         if origin_type not in agents.ORIGIN_TYPES:
             origin_type = "unknown"
@@ -406,7 +422,7 @@ class Run:
             confidence = max(0, min(100, int(args.get("confidence", 50))))
         except (TypeError, ValueError):
             confidence = 50
-        self.verdict = {
+        submitted = {
             "verdict": verdict,
             "confidence": confidence,
             "origin_doc": origin or None,
@@ -414,8 +430,32 @@ class Run:
             "summary": str(args.get("summary", "")),
         }
         state.done = True
-        self.emit("verdict", agent=state.name, **self.verdict)
+        if self.mode == "parallel":
+            self.votes.append(submitted)
+            self.emit("vote", agent=state.name, **submitted)
+        else:
+            self.verdict = submitted
+            self.emit("verdict", agent=state.name, **submitted)
         return "Verdict recorded."
+
+    def tally_votes(self) -> None:
+        """Plain majority in code. With no majority the honest answer is PLAUSIBLE."""
+        if not self.votes:
+            return
+        winner, n = Counter(v["verdict"] for v in self.votes).most_common(1)[0]
+        if n == 1 and len(self.votes) > 1:
+            winner = "PLAUSIBLE"
+        majority = [v for v in self.votes if v["verdict"] == winner] or self.votes
+        origin = Counter(v["origin_doc"] for v in majority).most_common(1)[0][0]
+        kind = Counter(v["origin_type"] for v in majority).most_common(1)[0][0]
+        self.verdict = {
+            "verdict": winner,
+            "confidence": round(sum(v["confidence"] for v in majority) / len(majority)),
+            "origin_doc": origin,
+            "origin_type": kind,
+            "summary": f"Majority of {len(self.votes)} independent agents: {[v['verdict'] for v in self.votes]}",
+        }
+        self.emit("verdict", agent="vote", **self.verdict)
 
 
 def _assistant_message(resp: LLMResponse) -> dict:

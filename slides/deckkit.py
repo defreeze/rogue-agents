@@ -37,6 +37,8 @@ BADGES = {
     "placeholder": ("PLACEHOLDER · TO BE MEASURED", PURPLE),
     "opinion": ("OPINION · TO BE BACKED BY RESULTS", PURPLE),
     "trace": ("REAL DATA · FROM A RECORDED RUN", CYAN),
+    "reported": ("REPORTED EVENTS · SOURCES IN NOTES", GREEN),
+    "vendor": ("VENDOR-REPORTED FIGURES", AMBER),
 }
 
 

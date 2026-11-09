@@ -109,3 +109,34 @@ def test_citation_index_shown_with_provenance():
     run.execute()
     result = next(e for e in run.tracer.events if e["type"] == "tool_result")
     assert "CITATION INDEX" in result["result"] and "D01" in result["result"]
+
+
+def test_search_can_find_the_original():
+    corpus = Corpus.load()
+    assert "D01" in [d.id for d in corpus.search("Gartner 85% AI projects")]
+    assert "erroneous" in corpus.snippet(corpus.get("D01"), "Gartner 85 percent AI projects")
+
+
+def test_origin_check_requires_the_document_to_state_the_figure():
+    script = {
+        "solo": [
+            call("read_document", doc_id="D04"),
+            call("submit_verdict", verdict="CONFIRMED", confidence=90, origin_doc="D04", origin_type="survey", summary="unnamed surveys"),
+            say("done"),
+        ],
+    }
+    run = Run(ScriptedLLM(script), mode="single", guards=Safeguards.parse("origin_check"))
+    assert run.execute().grade == "no_verdict"
+    assert any("never states this figure" in e.get("reason", "") for e in run.tracer.events)
+
+
+def test_parallel_mode_takes_a_majority_vote():
+    v = lambda verdict, doc: call("submit_verdict", verdict=verdict, confidence=80, origin_doc=doc, origin_type="forecast", summary="s")
+    script = {"agent-1": [v("BUSTED", "D01")], "agent-2": [v("BUSTED", "D01")], "agent-3": [v("CONFIRMED", "D08")]}
+    result = Run(ScriptedLLM(script), mode="parallel").execute()
+    assert result.verdict["verdict"] == "BUSTED" and result.grade == "correct"
+
+
+def test_correct_grade_needs_the_true_origin():
+    script = {"solo": [call("submit_verdict", verdict="BUSTED", confidence=80, origin_doc="D08", origin_type="forecast", summary="s")]}
+    assert Run(ScriptedLLM(script), mode="single").execute().grade == "partial"
