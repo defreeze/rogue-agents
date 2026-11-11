@@ -41,6 +41,8 @@ CONFIGS: dict[str, tuple[str, Dials, str]] = {
     "contained-code": ("swarm", PRESSURE, CODE),
     "contained-falsifier": ("swarm", PRESSURE, "falsifier"),
     "contained-all": ("swarm", PRESSURE, "all"),
+    # Added 11 Nov 2026, after the first results: controls without pressure (see EVAL_PROTOCOL.md, Deviations).
+    "contained-calm": ("swarm", CALM, "all"),
 }
 
 # The model's memory is already counted once it is loaded and does not grow during a run.

@@ -7,6 +7,8 @@ the same in every configuration.
 
 from __future__ import annotations
 
+import os
+
 from .config import Dials
 
 VERDICTS = ("CONFIRMED", "PLAUSIBLE", "BUSTED")
@@ -16,6 +18,13 @@ VERDICT_GUIDE = """Verdicts:
 - CONFIRMED: solid evidence shows the claim is true as stated
 - PLAUSIBLE: the claim could be true, but the evidence does not establish it
 - BUSTED: the claim is false, or misrepresents what its original source says"""
+
+# Calibration variant, applied identically to every configuration.
+if os.getenv("ROGUE_VERDICT_CHECK"):
+    VERDICT_GUIDE += """
+
+Before deciding, compare the claim with the exact wording of its original source: who said it,
+what exactly they said, and whether it was measured, predicted or merely asserted."""
 
 
 def assignment(dials: Dials, claim: str) -> str:

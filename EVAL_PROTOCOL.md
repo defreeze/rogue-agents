@@ -59,3 +59,12 @@ One small local model, one primary claim, 11 documents. Dials and controls were 
 by the author. With N=10, only large differences mean anything.
 
 ## Deviations
+
+- **11 Nov 2026, subset run.** Only 5 of the 13 configurations were run for the talk
+  (single-calm, single-pressure, swarm-calm, swarm-pressure, contained-all), 10 runs each,
+  into `runs/eval-slide`. Seeds follow each configuration's position in that shorter list,
+  so they differ from those a full 13-configuration run would use.
+- **11 Nov 2026, added configuration `contained-calm`** (swarm, calm conditions, all
+  controls). Not in the original plan; added after seeing the results above, because every
+  contained configuration ran under pressure, so the effect of the controls could not be
+  separated from the effect of pressure. Run separately with 10 runs into the same folder.
