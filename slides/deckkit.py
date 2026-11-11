@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
@@ -22,6 +24,13 @@ PURPLE = "A78BFA"
 RED = "F87171"
 GREEN = "34D399"
 AMBER = "FBBF24"
+CODE_BG = "070B16"  # terminal / code panels
+
+# DECK_THEME=black: pure black background with neutral grey panels, so shapes
+# copied into a black Google Slides deck blend in. Accent colours stay the same.
+THEME = os.getenv("DECK_THEME", "navy")
+if THEME == "black":
+    BG, PANEL, PANEL2, EDGE, MUTED, CODE_BG = "000000", "141414", "1F1F1F", "3A3A3A", "9A9A9A", "0A0A0A"
 
 FONT = "Arial"
 MONO = "Courier New"
@@ -37,6 +46,7 @@ BADGES = {
     "placeholder": ("PLACEHOLDER · TO BE MEASURED", PURPLE),
     "opinion": ("OPINION · TO BE BACKED BY RESULTS", PURPLE),
     "trace": ("REAL DATA · FROM A RECORDED RUN", CYAN),
+    "eval": ("REAL DATA · 10 RUNS PER ROW", CYAN),
     "reported": ("REPORTED EVENTS · SOURCES IN NOTES", GREEN),
     "vendor": ("VENDOR-REPORTED FIGURES", AMBER),
 }

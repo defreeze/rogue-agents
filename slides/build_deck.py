@@ -1,6 +1,7 @@
 """Generate the aiGrunn 2026 talk deck (v2): Rogue Agents.
 
     uv run --with python-pptx python slides/build_deck.py
+    DECK_THEME=black uv run --with python-pptx python slides/build_deck.py   # -> rogue-agents-black.pptx
 
 Follows the 20-minute arc: cold open, what swarms are, the experiment, a calm
 run, a pressure run, controls, results, where this is going, close.
@@ -20,12 +21,12 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Inches, Pt
 
 from deckkit import (
-    AMBER, BG, CYAN, EDGE, GREEN, H, MARGIN, MONO, MUTED, PANEL, PANEL2, PURPLE, RED, TEXT, W,
-    Deck, add_text, badge, box, box_text, connector, divider, footer, header, node, pill, rgb, style_table,
+    AMBER, BG, CODE_BG, CYAN, EDGE, GREEN, H, MARGIN, MONO, MUTED, PANEL, PANEL2, PURPLE, RED, TEXT, W,
+    THEME, Deck, add_text, badge, box, box_text, connector, divider, footer, header, node, pill, rgb, style_table,
 )
 
 HERE = Path(__file__).parent
-OUT = HERE / "rogue-agents.pptx"
+OUT = HERE / ("rogue-agents.pptx" if THEME == "navy" else f"rogue-agents-{THEME}.pptx")
 
 
 # ------------------------------------------------------------- trace data
@@ -204,7 +205,7 @@ def opening(d: Deck):
     )
     header(s, "And they coordinated", "A shared board, in the wild")
     badge(s, "reported")
-    box(s, MARGIN, 2.0, 7.6, 3.15, fill="070B16", line=EDGE)
+    box(s, MARGIN, 2.0, 7.6, 3.15, fill=CODE_BG, line=EDGE)
     add_text(s, MARGIN + 0.3, 2.2, 7.0, 2.8, [
         [("ParallelSectorAgentFeb3", {"color": CYAN, "bold": True})],
         "“Please append immediately if your next state arrives earlier.”",
@@ -524,7 +525,7 @@ def build():
     )
     header(s, "One step, up close", "A finding on the board")
     badge(s, "trace")
-    box(s, MARGIN, 2.0, 7.6, 4.3, fill="070B16", line=EDGE)
+    box(s, MARGIN, 2.0, 7.6, 4.3, fill=CODE_BG, line=EDGE)
     quote = f2["quote"]
     pad = " " * 13
     claim_lines = textwrap.wrap(f2["claim"], 40)
@@ -565,7 +566,7 @@ def build():
 
     s = d.slide("6:25-6:30 · Optional (cut for non-technical rooms). Simplified from src/rogue_agents/runtime.py; the real one is ~30 lines.")
     header(s, "No magic", "The whole agent loop")
-    box(s, MARGIN, 1.95, 7.6, 4.6, fill="070B16", line=EDGE)
+    box(s, MARGIN, 1.95, 7.6, 4.6, fill=CODE_BG, line=EDGE)
     add_text(s, MARGIN + 0.35, 2.25, 7.0, 4.1, [
         "def run_agent(agent, task, tools):",
         "    messages = [system(agent), user(task)]",
@@ -778,7 +779,7 @@ def build():
         ("lead", "submit_verdict", "BLOCKED by origin check: D08 attributes this figure to D01, so it cannot be the origin; read the original"),
     ]):
         y = 2.0 + i * 1.4
-        box(s, MARGIN, y, W - 2 * MARGIN, 1.15, fill="070B16", line=RED, line_w=1.25)
+        box(s, MARGIN, y, W - 2 * MARGIN, 1.15, fill=CODE_BG, line=RED, line_w=1.25)
         add_text(s, MARGIN + 0.3, y + 0.15, 4.0, 0.35, f"{agent} → {tool}", size=13, font=MONO, color=MUTED)
         add_text(s, MARGIN + 0.3, y + 0.5, W - 2 * MARGIN - 0.6, 0.6, msg, size=14, font=MONO, color=RED)
     add_text(s, MARGIN, 6.3, W - 2 * MARGIN, 0.4, "The agent gets the reason back, and has to do better.", size=15, italic=True, color=CYAN, align=PP_ALIGN.CENTER)
@@ -810,45 +811,78 @@ def build():
     footer(s, d.n)
 
     s = d.slide(
-        "14:30-15:30 · The honest lesson from development. Code checks held: budgets cut the runaway (141,620 -> ~51,000 tokens), "
-        "the quote check removed every quote that wasn't in its source (9 -> 0), the origin check rejected relays. The AI falsifier "
-        "was captured: it searched the same phrase, read the same blogs, and agreed. The verdict stayed wrong, because verified quotes "
-        "from blogs that had already mutated the claim are still verified quotes. UPDATE after the final eval."
+        "14:30-15:30 · What the controls bought, from the evaluation of 11 Nov 2026 (10 runs per setup, medians; runs/eval-slide). "
+        "Budgets stopped the runaway: under pressure, runs that never concluded went 9/10 -> 2/10 and tokens 149k -> 56k. "
+        "The controls made every run open the original (calm: 2/10 -> 10/10). But the verdict was still CONFIRMED in 5/10 calm and 6/10 "
+        "pressured runs: the agents read Gartner's 2018 forecast and called it a measurement. Accuracy differences are within the noise at N=10: "
+        "don't claim the controls made it worse.\n"
+        "The falsifier point comes from the pilot runs only (one run; contained-falsifier was not in this evaluation): it searched the same "
+        "phrase, read the same blogs, and agreed. Say 'in my pilot'."
     )
-    header(s, "What the controls bought", "Code checks held. The AI checker didn't.")
-    badge(s, "pilot")
+    header(s, "What the controls bought", "The checks held. The verdict didn't.")
+    badge(s, "eval")
     box(s, MARGIN, 1.95, 5.85, 3.6, fill=PANEL, line=GREEN, line_w=1.5)
-    add_text(s, MARGIN + 0.35, 2.15, 5.2, 0.5, "Deterministic checks: held", size=20, bold=True, color=GREEN)
+    add_text(s, MARGIN + 0.35, 2.15, 5.2, 0.5, "Code checks: did their job", size=20, bold=True, color=GREEN)
     add_text(s, MARGIN + 0.35, 2.8, 5.2, 2.6, [
-        [("141,620 → ~51,000 ", {"bold": True}), ("tokens: budgets stopped the runaway", {"color": MUTED})],
-        [("9 → 0 ", {"bold": True}), ("quotes that weren't in their source", {"color": MUTED})],
-        [("relays rejected ", {"bold": True}), ("as the “origin” of the number", {"color": MUTED})],
+        [("149k → 56k ", {"bold": True}), ("tokens under pressure: budgets stopped the runaway", {"color": MUTED})],
+        [("9 → 2 ", {"bold": True}), ("of 10 pressured runs that never reached a verdict", {"color": MUTED})],
+        [("2 → 10 ", {"bold": True}), ("of 10 calm runs that opened the original source", {"color": MUTED})],
     ], size=16, space_after=12)
     box(s, 6.9, 1.95, 5.85, 3.6, fill=PANEL, line=RED, line_w=1.5)
-    add_text(s, 7.25, 2.15, 5.2, 0.5, "AI falsifier: captured", size=20, bold=True, color=RED)
-    add_text(s, 7.25, 2.8, 5.2, 2.6, ["Searched the same phrase", "Read the same blogs", "Agreed with the consensus it was meant to challenge"], size=16, color=MUTED, space_after=12)
+    add_text(s, 7.25, 2.15, 5.2, 0.5, "The answer: still wrong", size=20, bold=True, color=RED)
+    add_text(s, 7.25, 2.8, 5.2, 2.6, [
+        [("5 / 10 ", {"bold": True, "color": TEXT}), ("calm runs still said CONFIRMED", {})],
+        [("6 / 10 ", {"bold": True, "color": TEXT}), ("under pressure", {})],
+        [("They read the 2018 forecast ", {}), ("and called it a measurement", {"color": TEXT})],
+        [("In my pilot, the AI checker agreed too", {"italic": True})],
+    ], size=16, color=MUTED, space_after=10)
     box_text(s, MARGIN, 5.85, W - 2 * MARGIN, 0.85, [[("Verifying a quote is not verifying a claim.", {"bold": True, "size": 22, "color": CYAN})]], fill=PANEL2, align=PP_ALIGN.CENTER)
     footer(s, d.n)
 
     # ==================================================== RESULTS 15:30-17:30
 
     s = d.slide(
-        "15:30-16:30 · PLACEHOLDER: fill from 'rogue eval -n <N>' (runs/eval-*/summary.txt). Report counts out of N. Name the model.\n"
-        "Three comparisons: single agent vs swarm (is the swarm worth it?), calm vs pressure (do the dials cause the failure?), "
-        "open vs contained (what do controls buy, at what cost?)."
+        "15:30-16:30 · RESULTS. Evaluation of 11 Nov 2026 (runs/eval-slide): 5 of the 13 pre-registered configurations plus one added afterwards "
+        "(contained swarm, calm), 10 runs each, "
+        "interleaved, qwen3:8b via Ollama, temperature 0.6. No infrastructure failures. Every wrong verdict was CONFIRMED with confidence >= 70 (false consensus).\n"
+        "SAY IT: 'The model already believed the myth. A single agent opened the Gartner source in 8 of 10 calm runs and still said CONFIRMED 9 times. "
+        "A calm team softened that. Pressure didn't make the team agree on a lie, it made it run away: 9 of 10 never concluded, at ~12x the tokens. "
+        "My controls made the swarm finish on budget and made every run open the original, but half or more were still wrong, calm or not. "
+        "Two fully correct answers in 60 runs.'\n"
+        "HONEST LIMITS: N=10, so Wilson 95% ranges are wide. Single wrong 9/10 = 60-98%, calm swarm wrong 3/10 = 11-60%: just apart, a signal, not proof. "
+        "Contained vs open swarm (calm 5/10 vs 3/10 wrong; 24-76% vs 11-60%) overlap: no claim that controls hurt or help accuracy. What is clear: opened origin 2/10 -> 10/10, runaway 9/10 -> 2/10. "
+        "Contained-calm was added after seeing the first results: say so. Partly right = PLAUSIBLE, or BUSTED with the wrong origin. No verdict = model-call limit reached "
+        "(90; 45 with budgets). Subset run is a protocol deviation: say so."
     )
     header(s, "Results", "Single agent vs open swarm vs contained swarm")
-    badge(s, "placeholder")
-    data_table(s, [
-        ("Configuration", "Correct", "Partly", "Wrong", "False consensus", "Support → roots", "Tokens"),
-        ("Single agent · calm", "[ ]/N", "[ ]/N", "[ ]/N", "[ ]/N", "[ ] → [ ]", "[ ]"),
-        ("Open swarm · calm", "[ ]/N", "[ ]/N", "[ ]/N", "[ ]/N", "[ ] → [ ]", "[ ]"),
-        ("Single agent · pressure", "[ ]/N", "[ ]/N", "[ ]/N", "[ ]/N", "[ ] → [ ]", "[ ]"),
-        ("Open swarm · pressure", "[ ]/N", "[ ]/N", "[ ]/N", "[ ]/N", "[ ] → [ ]", "[ ]"),
-        ("Contained swarm · pressure", "[ ]/N", "[ ]/N", "[ ]/N", "[ ]/N", "[ ] → [ ]", "[ ]"),
-    ], [3.4, 1.3, 1.3, 1.3, 1.9, 1.75, 1.183], h=3.4,
-        color_cell=lambda i, j, v: (TEXT if j == 0 else PURPLE, j == 0))
-    add_text(s, MARGIN, 5.75, W - 2 * MARGIN, 0.7, "To be filled from the repeated evaluation · qwen3:8b · N runs per configuration · all traces published.", size=14, color=MUTED)
+    badge(s, "eval")
+    rows = [
+        ("Configuration", "Wrong", "Partly", "Correct", "No verdict", "Opened origin", "Tokens"),
+        ("Single agent · calm", "9/10", "1/10", "0/10", "0/10", "8/10", "12k"),
+        ("Single agent · pressure", "9/10", "1/10", "0/10", "0/10", "0/10", "8k"),
+        ("Open swarm · calm", "3/10", "7/10", "0/10", "0/10", "2/10", "40k"),
+        ("Open swarm · pressure", "1/10", "0/10", "0/10", "9/10", "10/10", "149k"),
+        ("Contained swarm · calm", "5/10", "3/10", "1/10", "1/10", "10/10", "55k"),
+        ("Contained swarm · pressure", "6/10", "1/10", "1/10", "2/10", "10/10", "56k"),
+    ]
+    outcome_colors = {1: RED, 2: AMBER, 3: GREEN, 4: PURPLE}
+
+    def result_colors(i, j, v):
+        if j == 0:
+            return TEXT, True
+        if j in outcome_colors:
+            top = max(int(rows[i][k].split("/")[0]) for k in outcome_colors)
+            n = int(v.split("/")[0])
+            return (outcome_colors[j] if n else MUTED), n == top
+        return MUTED, False
+
+    data_table(s, rows, [3.4, 1.4, 1.4, 1.4, 1.6, 1.75, 1.183], y=1.8, h=3.85, color_cell=result_colors, size=13)
+    add_text(s, MARGIN, 5.78, W - 2 * MARGIN, 0.4,
+             "“85% of AI projects fail” · qwen3:8b · 10 runs per row · tokens are medians · every wrong answer was ≥70% confident",
+             size=13, color=MUTED)
+    box_text(s, MARGIN, 6.2, W - 2 * MARGIN, 0.65, [[("The model already believed it. ", {"bold": True, "color": RED}),
+             ("Teams softened it, pressure made them run away, controls made them read, not understand.", {})]],
+             fill=PANEL2, size=15, align=PP_ALIGN.CENTER)
     footer(s, d.n)
     section_tag(s, "15:30")
 
